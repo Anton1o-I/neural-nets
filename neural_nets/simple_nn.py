@@ -48,7 +48,11 @@ class ClassificationNN:
         self.model.fit(X, y, epochs=self.epochs, batch_size=self.batch_size)
         return self
 
-    def predict(self, X, threshold=0.5):
+    def predict(self, X, threshold: float = 0.5):
+        if threshold <= 0 or threshold >= 1:
+            raise ValueError(
+                f"Threshold must be a value between 0 and 1, given value {threshold}"
+            )
         pred = self.model.predict(X)
         values = array([1 if item > threshold else 0 for item in pred])
         return values
