@@ -3,7 +3,7 @@ from keras.layers import Dense, Dropout
 from numpy import array
 
 
-class ClassificationNN:
+class BaseNN:
     def __init__(
         self,
         input_dim: int,
@@ -11,9 +11,9 @@ class ClassificationNN:
         epochs: int = 100,
         batch_size: int = 32,
         dropout: float = None,
-        optimizer: str = "rmsprop",
+        optimizer: str = "sgd",
         activation_fn: str = "sigmoid",
-        loss: str = "binary_crossentropy",
+        loss: str = None,
     ):
         self.input_dim = input_dim
         if all([type(item) != int for item in layers]):
@@ -38,12 +38,36 @@ class ClassificationNN:
             )
             if self.dropout:
                 self.model.add(Dropout(self.dropout))
-        self.model.add(Dense(1, activation=self.activation_fn))
+
+
+class ClassificationNN(BaseNN):
+    def __init__(
+        self,
+        input_dim: int,
+        layers: list,
+        epochs: int = 100,
+        batch_size: int = 32,
+        dropout: float = None,
+        optimizer: str = "sgd",
+        activation_fn: str = "sigmoid",
+        loss: str = "binary_crossentropy",
+    ):
+        super().__init__(
+            input_dim,
+            layers,
+            epochs,
+            batch_size,
+            dropout,
+            optimizer,
+            activation_fn,
+            loss,
+        )
 
     def train(self, X, y):
         self._build()
+        self.model.add(Dense(1, activation=self.activation_fn))  # add final layer
         self.model.compile(
-            optimizer=self.optimizer, loss=self.loss, metrics=["accuracy"]
+            optimizer=self.optimizer, loss=self.loss, metrics=["binary_accuracy"]
         )
         self.model.fit(X, y, epochs=self.epochs, batch_size=self.batch_size)
         return self
@@ -58,4 +82,38 @@ class ClassificationNN:
         return values
 
     def predict_proba(self, X):
+        return self.model.predict(X)
+
+
+class RegressionNN(BaseNN):
+    def __init__(
+        self,
+        input_dim: int,
+        layers: list,
+        epochs: int = 100,
+        batch_size: int = 32,
+        dropout: float = None,
+        optimizer: str = "sgd",
+        activation_fn: str = "relu",
+        loss: str = "mean_absolute_error",
+    ):
+        super().__init__(
+            input_dim,
+            layers,
+            epochs,
+            batch_size,
+            dropout,
+            optimizer,
+            activation_fn,
+            loss,
+        )
+
+    def train(self, X, y):
+        self._build()
+        self.model.add(Dense(1, activation=self.activation_fn))  # add final layer
+        self.model.compile(optimizer=self.optimizer, loss=self.loss, metrics=["mae"])
+        self.model.fit(X, y, epochs=self.epochs, batch_size=self.batch_size)
+        return self
+
+    def predict(self, X):
         return self.model.predict(X)
