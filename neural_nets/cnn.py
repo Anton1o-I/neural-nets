@@ -1,6 +1,6 @@
 from keras.models import Sequential
 from keras.layers import Dense, Flatten, Conv2D, MaxPooling2D
-from pandas import DataFrame, Series
+from numpy import array
 
 
 class ConvolutionalNN:
@@ -12,6 +12,17 @@ class ConvolutionalNN:
         loss: str = "categorical_crossentropy",
         optimizer: str = "adam",
     ):
+        """
+        Initializes a ConvolutionalNN object.
+
+        conv_layers: List of the number of nodes per convolution layer
+        class_layers: List of number of nodes per layer in the classification phase
+        pooling: Dictionary {"pool_size":typle, "stride":int} if provided adds a
+        pooling layer with specified parameters after each convolution
+        loss: Specifies the loss function to use
+        optimizer: Specifies the optimizer to use
+        """
+
         self.conv_layers = conv_layers
         self.class_layers = class_layers
         self.pooling = pooling
@@ -19,6 +30,11 @@ class ConvolutionalNN:
         self.optimizer = optimizer
 
     def _build_nn(self, X):
+        """
+        Builds out the layers in the neural network, helper function,
+        not supposed to be directly called
+        """
+
         self.model = Sequential()
         for i, item in enumerate(self.conv_layers):
             if i == 0:
@@ -43,7 +59,16 @@ class ConvolutionalNN:
         for item in self.class_layers:
             self.model.add(Dense(units=item, activation="sigmoid"))
 
-    def train(self, X: DataFrame, y: DataFrame, epochs: int = 2, batch_size: int = 32):
+    def train(self, X: array, y: array, epochs: int = 2, batch_size: int = 32):
+        """Trains the neural network
+
+        Parameters:
+        X (array): Array shape needs to match input_shape, change code above if necessary
+        y (array): Dummied labels for classification
+        epochs (int): Number of epochs to run
+        batch_size (int): Size of batch to use to calculate gradient
+        """
+
         self._build_nn(X)
         self.model.add(Dense(units=y.shape[1], activation="softmax"))
         self.model.compile(
@@ -51,10 +76,12 @@ class ConvolutionalNN:
         )
         self.model.fit(x=X, y=y, epochs=epochs, batch_size=batch_size)
 
-    def predict_proba(self, X: DataFrame):
+    def predict_proba(self, X: array):
+        """Returns raw probability values per class"""
         return self.model.predict(x=X).round(4)
 
-    def predict(self, X: DataFrame):
+    def predict(self, X: array):
+        """Takes argmax of predict_proba and returns 1 for most likely, 0 else"""
         preds = self.model.predict(X).round(4)
         for obs in preds:
             max_loc = obs.argmax()
