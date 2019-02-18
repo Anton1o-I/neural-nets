@@ -1,5 +1,5 @@
-from keras.layers import Dense, GRU, Embedding
-from keras.models import Sequential
+from tensorflow.keras.layers import Dense, GRU, Embedding
+from tensorflow.keras.models import Sequential
 from numpy import unique, array
 
 
