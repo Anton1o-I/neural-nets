@@ -78,11 +78,11 @@ class ConvolutionalNN:
 
     def predict_proba(self, X: array):
         """Returns raw probability values per class"""
-        return self.model.predict(x=X).round(4)
+        return self.model.predict(x=X)
 
     def predict(self, X: array):
         """Takes argmax of predict_proba and returns 1 for most likely, 0 else"""
-        preds = self.model.predict(X).round(4)
+        preds = self.model.predict(X)
         for obs in preds:
             max_loc = obs.argmax()
             for i, _ in enumerate(obs):
