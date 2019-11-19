@@ -91,4 +91,3 @@ class ConvolutionalNN:
                 else:
                     obs[i] = 0
         return preds
-
